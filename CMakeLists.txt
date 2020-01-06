@@ -7,8 +7,6 @@ execute_process(
   OUTPUT_FILE predicates_init.h
   OUTPUT_VARIABLE OUTVAR)
 
-MESSAGE("${OUTVAR}")
-
 set(kit gts)
 project(${kit})
 
@@ -49,30 +47,32 @@ set(srcs
   src/vopt.c
   )
 
-configure_file(src/config.h.win32 config.h)
-
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 
+######## glib-2.0 #########
 find_library(glib_LIBRARY NAMES glib libglib glib-2.0 libglib-2.0
              HINTS ${glib_BINARY_DIR})
-
 get_filename_component(glib_LIBRARY_DIR ${glib_LIBRARY} DIRECTORY)
 get_filename_component(glib_LIBRARY_NAME ${glib_LIBRARY} NAME)
 string(REGEX REPLACE "\\.[^.]*$" "" glib_LIBRARY_NAME ${glib_LIBRARY_NAME})
+string(REGEX REPLACE "^lib" "" glib_SUBDIRECTORY_NAME ${glib_LIBRARY_NAME})
 
 find_path(glib_H NAMES glib.h
-          HINTS ${glib_LIBRARY_DIR}/../include)
+    HINTS ${glib_LIBRARY_DIR}/../../include/${glib_SUBDIRECTORY_NAME})
 get_filename_component(glib_INCLUDE_DIR ${glib_H} DIRECTORY)
 
 set(glib_CONFIG_H)
 find_path(glib_CONFIG_H NAMES glibconfig.h
-          HINTS ${glib_LIBRARY_DIR}/${glib_LIBRARY_NAME}/include)
+    HINTS ${glib_LIBRARY_DIR}/${glib_SUBDIRECTORY_NAME}/include)
 
 get_filename_component(glibconfig_INCLUDE_DIR ${glib_CONFIG_H} DIRECTORY)
-include_directories(${glib_INCLUDE_DIR} ${glib_CONFIG_H})
+
+include_directories(${glib_H} ${glib_CONFIG_H})
+# include_directories(${glib_INCLUDE_DIR} ${glib_CONFIG_H})
+###########################
 
 add_definitions(/DGTS_COMPILATION)
 
